@@ -1,46 +1,46 @@
-package karatsuba;
+package gaussmult;
 
-import java.math.BigDecimal;
+import java.math.BigInteger;
 
 public class Karatsuba {
-
-	public double multipleRecurse(double x, double y) {
-		// Gets larger number
-		int lengthX = String.valueOf(x).length();
-		int lengthY = String.valueOf(y).length();
-		int n = Math.max(lengthX, lengthY);
+	
+	public BigInteger multiplyRecurse(BigInteger x, BigInteger y) {
 		
-		// If n is a single digit number,
-		// multiply normally
-		if(n < 10)
-			return x * y;
+		// Gets whichever number is longer
+		int n = Math.max(x.toString().length(), y.toString().length());
 		
-		// Half of n
-		double newN = (n / 2) + (n % 2);
+		// If n is a single-digit number
+		if(n == 1) {
+			return x.multiply(y);
+		}
 		
-		// Use these for finding product
-		double tenN = (long)Math.pow(10, n);
-		double tenNewN = (long)Math.pow(10, newN);
+		// Divide n by 2 to use for halving x and y
+		n = (n / 2) + (n % 2);
 		
-		// Subnumbers to find subequations
-		double a = x / tenN;
-		double b = x - (a * tenN);
-		double c = y / tenN;
-		double d = y - (c * tenN);
+		// Sub-numbers of x and y
+		BigInteger a = x.divide(BigInteger.TEN.pow(n));
+		BigInteger b = x.subtract(a.multiply(BigInteger.TEN.pow(n)));
+		BigInteger c = y.divide(BigInteger.TEN.pow(n));
+		BigInteger d = y.subtract(c.multiply(BigInteger.TEN.pow(n)));
 		
-		// Subequations to find final product
-		double ac = multipleRecurse(a, c);
-		double bd = multipleRecurse(b, d);
-		double abcd = multipleRecurse(a + b, c + d);
+		// Sub-equations
+		BigInteger ac = multiplyRecurse(a, c);
+		BigInteger bd = multiplyRecurse(b, d);
+		BigInteger abcd = multiplyRecurse(a.add(b), c.add(d));
 		
-		return (tenN * ac) + (tenNewN * (abcd - ac - bd)) + bd;
+		// Multiplying sub-equations with 10^2n and 10^n, respectively
+		BigInteger finalAC = (BigInteger.TEN.pow(2*n)).multiply(ac);
+		BigInteger finalABCD = (BigInteger.TEN.pow(n)).multiply(abcd.subtract(ac).subtract(bd));
+		
+		// Final product
+		return finalAC.add(finalABCD).add(bd);
 	}
 	
 	public static void main(String[] args) {
 		Karatsuba k = new Karatsuba();
-		double result = k.multipleRecurse(2733, 72434);
-		BigDecimal r = new BigDecimal("" + result);
-		System.out.println(r);
-		
+		BigInteger x = new BigInteger("3141592653589793238462643383279502884197169399375105820974944592");
+		BigInteger y = new BigInteger("2718281828459045235360287471352662497757247093699959574966967627");
+		BigInteger result = k.multiplyRecurse(x, y);
+		System.out.println(result);
 	}
 }
